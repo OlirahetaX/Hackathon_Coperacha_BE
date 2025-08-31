@@ -1,0 +1,26 @@
+2025/08/31-11:50:29.130 8338 Reusing MANIFEST C:\Users\Ricardo Rodriguez\Documents\GitHub\Hackathon_Coperacha_BE\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/08/31-11:50:29.130 8338 Recovering log #96
+2025/08/31-11:50:29.234 8338 Reusing old log C:\Users\Ricardo Rodriguez\Documents\GitHub\Hackathon_Coperacha_BE\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000096.log 
+2025/08/31-11:50:31.047 60a8 Level-0 table #102: started
+2025/08/31-11:50:31.072 60a8 Level-0 table #102: 1552696 bytes OK
+2025/08/31-11:50:31.073 60a8 Delete type=0 #96
+2025/08/31-11:50:31.074 60a8 Manual compaction at level-0 from '\x00 \x00\x00\x00' @ 72057594037927935 : 1 .. '\x00!\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/08/31-11:50:33.095 8338 Compacting 1@1 + 2@2 files
+2025/08/31-11:50:33.182 8338 Generated table #103@1: 57017 keys, 2226980 bytes
+2025/08/31-11:50:33.237 8338 Generated table #104@1: 27038 keys, 1710970 bytes
+2025/08/31-11:50:33.237 8338 Compacted 1@1 + 2@2 files => 3937950 bytes
+2025/08/31-11:50:33.237 8338 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/31-11:50:33.237 8338 Delete type=2 #98
+2025/08/31-11:50:33.237 8338 Delete type=2 #99
+2025/08/31-11:50:33.237 8338 Delete type=2 #102
+2025/08/31-11:51:43.433 7d0 Level-0 table #106: started
+2025/08/31-11:51:43.463 7d0 Level-0 table #106: 1444989 bytes OK
+2025/08/31-11:51:43.464 7d0 Delete type=0 #101
+2025/08/31-11:51:43.777 8338 Compacting 1@1 + 2@2 files
+2025/08/31-11:51:43.873 8338 Generated table #107@1: 60320 keys, 2230063 bytes
+2025/08/31-11:51:43.929 8338 Generated table #108@1: 29181 keys, 1899879 bytes
+2025/08/31-11:51:43.929 8338 Compacted 1@1 + 2@2 files => 4129942 bytes
+2025/08/31-11:51:43.929 8338 compacted to: files[ 0 0 2 0 0 0 0 ]
+2025/08/31-11:51:43.930 8338 Delete type=2 #103
+2025/08/31-11:51:43.930 8338 Delete type=2 #104
+2025/08/31-11:51:43.930 8338 Delete type=2 #106

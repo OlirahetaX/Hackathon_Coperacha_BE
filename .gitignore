@@ -18,7 +18,5 @@
 
 # Hardhat coverage reports
 /coverage
-/.wwebjs_auth
-/.wwebjs_cache
 
 .env
