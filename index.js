@@ -6,6 +6,8 @@ const { Client, LocalAuth } = pkg;
 import qrcode from "qrcode-terminal";
 import { ethers } from "ethers";
 import cors from "cors";
+import { startWhatsAppBot } from './WhatsappBot.js';
+
 
 dotenv.config();
 
@@ -47,6 +49,16 @@ async function connectDB() {
   }
 }
 connectDB();
+
+
+(async () => {
+  try {
+    const client = await startWhatsAppBot();
+    console.log("🤖 Bot de WhatsApp iniciado desde otro proyecto");
+  } catch (err) {
+    console.error("❌ Error al iniciar el bot:", err);
+  }
+})();
 
 // Conectar a Arbitrum Sepolia via QuickNode
 const url = `https://white-young-road.arbitrum-sepolia.quiknode.pro/${process.env.QUICK_NODE_API}`;
