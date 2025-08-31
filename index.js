@@ -270,24 +270,14 @@ app.post("/createWallet", async (req, res) => {
       })
       .find((e) => e && e.name === "WalletCreated");
 
-    const walletAddress = event ? event.args.walletAddress : null;
+    const walletAddress =creador;
 
-    if (walletAddress) {
-      const miembrosLower = (miembros || []).map(normalizeAddress);
-      const creadorLower = normalizeAddress(creador);
-
-      // 1) Actualiza miembros
-      const r1 = await db.collection("users").updateMany(
-        { billetera: { $in: miembrosLower } },
+if (walletAddress) {
+      await db.collection("users").updateMany(
+        { billetera: { $in: miembros } },
         { $addToSet: { wallets: walletAddress } }
-      );
-
-      // 2) Asegura también al creador
-      const r2 = await db.collection("users").updateOne(
-        { billetera: creadorLower },
-        { $addToSet: { wallets: walletAddress } }
-      );
-    }
+      );
+    }
 
     res.json({
       message: "Wallet creada con éxito",

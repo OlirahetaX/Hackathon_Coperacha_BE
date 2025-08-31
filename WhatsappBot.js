@@ -263,7 +263,7 @@ export async function startWhatsAppBot() {
         if (currentState === STATES.CONFIRM_WALLET) {
             if (text === 'sí' || text === 'si') {
                 // ✅ Normaliza a minúsculas
-                const billeteraNorm = String(tempUserData[number].wallet).toLowerCase();
+                const billeteraNorm = String(tempUserData[number].wallet);
 
                 const newUser = {
                     celular: number,
@@ -358,7 +358,7 @@ export async function startWhatsAppBot() {
                 case '2': {
 
                     const userDoc = await findClient(number);
-                    const creador = (userDoc?.billetera || userDoc?.wallet || '').toLowerCase();
+                    const creador = (userDoc?.billetera || userDoc?.wallet || '');
                     if (!creador) {
                         await message.reply('⚠️ Necesitas tener una billetera personal registrada para ser el creador. Escribe "registrar" para completar tu registro.');
                         break;
@@ -445,8 +445,9 @@ export async function startWhatsAppBot() {
             if (!tempUserData[number].createCommunity) tempUserData[number].createCommunity = {};
 
             const { list, invalid } = parseAddresses(textRaw);
-            const creador = (tempUserData[number].createCommunity.creador || '').toLowerCase();
+            const creador = (tempUserData[number].createCommunity.creador || '');
             const set = new Set(list);        // 'list' ya viene en minúsculas por parseAddresses
+            
             if (creador) set.add(creador);
             const finalMembers = [...set];
 
