@@ -40,15 +40,19 @@ async function connectDB() {
     console.log("Connected to MongoDB (native driver)");
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
     // índices útiles
-    await db.collection("users").createIndex({ correo: 1 }, { unique: true }).catch(()=>{});
-    await db.collection("users").createIndex({ celular: 1 }, { unique: true }).catch(()=>{});
-    await db.collection("users").createIndex({ billetera: 1 }, { unique: true }).catch(()=>{});
-    await db.collection("config").createIndex({ _id: 1 }, { unique: true }).catch(()=>{});
+    await db.collection("users").createIndex({ correo: 1 }, { unique: true }).catch(() => { });
+    await db.collection("users").createIndex({ celular: 1 }, { unique: true }).catch(() => { });
+    await db.collection("users").createIndex({ billetera: 1 }, { unique: true }).catch(() => { });
+    await db.collection("config").createIndex({ _id: 1 }, { unique: true }).catch(() => { });
   } catch (err) {
     console.error("MongoDB connection error:", err);
   }
 }
 connectDB();
+
+function normalizeAddress(a) {
+  return String(a || '').toLowerCase();
+}
 
 
 (async () => {
@@ -97,7 +101,7 @@ async function getEthToHnlRate() {
     if (cfg && typeof cfg.ethToHnl === "number" && cfg.ethToHnl > 0) {
       return cfg.ethToHnl;
     }
-  } catch {}
+  } catch { }
   // fallback "enduro": puedes ajustar por .env
   const fallback = Number(process.env.ETH_TO_HNL) || 80000; // 1 ETH ≈ 80,000 HNL (ejemplo)
   return fallback;
@@ -135,10 +139,10 @@ function timeAgoFromTsSec(tsSec) {
   const m = Math.floor(s / 60);
   const h = Math.floor(m / 60);
   const d = Math.floor(h / 24);
-  if (d > 0) return `hace ${d} día${d>1?'s':''}`;
-  if (h > 0) return `hace ${h} hora${h>1?'s':''}`;
-  if (m > 0) return `hace ${m} minuto${m>1?'s':''}`;
-  return `hace ${s} segundo${s!==1?'s':''}`;
+  if (d > 0) return `hace ${d} día${d > 1 ? 's' : ''}`;
+  if (h > 0) return `hace ${h} hora${h > 1 ? 's' : ''}`;
+  if (m > 0) return `hace ${m} minuto${m > 1 ? 's' : ''}`;
+  return `hace ${s} segundo${s !== 1 ? 's' : ''}`;
 }
 
 // =======================
@@ -155,6 +159,8 @@ app.get("/", (req, res) => res.send("Hola desde backend"));
 app.post("/createUser", async (req, res) => {
   try {
     const { correo, nombre, celular, billetera } = req.body;
+
+    billetera = normalizeAddress(billetera);
 
     if (!correo || !nombre || !celular || !billetera) {
       return res
@@ -231,7 +237,8 @@ app.get("/users/phone/:celular", async (req, res) => {
 
 app.get("/users/wallet/:billetera", async (req, res) => {
   try {
-    const user = await db.collection("users").findOne({ billetera: req.params.billetera });
+    const bLower = normalizeAddress(req.params.billetera);
+    const user = await db.collection("users").findOne({ billetera: bLower });
     if (!user) return res.status(404).json({ message: "Usuario no encontrado." });
     res.status(200).json(user);
   } catch (error) {
@@ -266,8 +273,18 @@ app.post("/createWallet", async (req, res) => {
     const walletAddress = event ? event.args.walletAddress : null;
 
     if (walletAddress) {
-      await db.collection("users").updateMany(
-        { billetera: { $in: miembros } },
+      const miembrosLower = (miembros || []).map(normalizeAddress);
+      const creadorLower = normalizeAddress(creador);
+
+      // 1) Actualiza miembros
+      const r1 = await db.collection("users").updateMany(
+        { billetera: { $in: miembrosLower } },
+        { $addToSet: { wallets: walletAddress } }
+      );
+
+      // 2) Asegura también al creador
+      const r2 = await db.collection("users").updateOne(
+        { billetera: creadorLower },
         { $addToSet: { wallets: walletAddress } }
       );
     }
@@ -399,7 +416,8 @@ app.post("/wallets/:walletAddress/votar", async (req, res) => {
 // validar que el usuario esta registrado (FIX: usar billetera)
 app.get("/walletRegistrada", async (req, res) => {
   try {
-    const { wallet } = req.query;
+    //const { wallet } = req.query;
+    const wallet = normalizeAddress(req.query.wallet);
     if (!wallet) {
       return res.status(400).json({ message: "⚠️ Se requiere 'wallet' en query params." });
     }
@@ -413,7 +431,8 @@ app.get("/walletRegistrada", async (req, res) => {
 
 app.get("/Saldos", async (req, res) => {
   try {
-    const { wallet } = req.query;
+    //const { wallet } = req.query;
+    const wallet = normalizeAddress(req.query.wallet);
     if (!wallet) {
       return res.status(400).json({ message: "⚠️ Se requiere 'wallet' en query params." });
     }
@@ -482,7 +501,7 @@ app.get("/wallets/personal/:address/txs", async (req, res) => {
     const enriched = [];
     for (const t of txs) {
       const blockNumber = t.blockNumber || t.block || t?.transaction?.blockNumber;
-      let ts = Date.now()/1000;
+      let ts = Date.now() / 1000;
       if (blockNumber) {
         const blk = await customHttpProvider.getBlock(BigInt(blockNumber));
         if (blk && blk.timestamp) ts = Number(blk.timestamp);
@@ -555,7 +574,7 @@ app.get("/wallets/:walletAddress/aportes", async (req, res) => {
     }
 
     // ordenar por mayor aporte
-    aportes.sort((a,b)=> Number(b.totalWei) - Number(a.totalWei));
+    aportes.sort((a, b) => Number(b.totalWei) - Number(a.totalWei));
 
     res.json({ walletAddress, aportes });
   } catch (error) {
@@ -609,7 +628,7 @@ app.get("/wallets/:walletAddress/propuestas-historial", async (req, res) => {
     const ultimasTx = [];
     for (const t of txs) {
       const blockNumber = t.blockNumber || t.block;
-      let ts = Date.now()/1000;
+      let ts = Date.now() / 1000;
       if (blockNumber) {
         const blk = await customHttpProvider.getBlock(BigInt(blockNumber));
         if (blk?.timestamp) ts = Number(blk.timestamp);
@@ -646,7 +665,7 @@ app.get("/wallets/:walletAddress/dashboard", async (req, res) => {
 
     // saldo
     let saldoWei = 0n;
-    try { saldoWei = BigInt(await walletContract.saldoWallet()); } catch {}
+    try { saldoWei = BigInt(await walletContract.saldoWallet()); } catch { }
 
     // miembros desde Mongo (quienes tengan esa wallet en su arreglo)
     const miembros = await db.collection("users")
@@ -656,7 +675,7 @@ app.get("/wallets/:walletAddress/dashboard", async (req, res) => {
 
     // propuestas (contadores rápidos)
     let total = 0;
-    try { total = Number(await walletContract.totalPropuestas()); } catch {}
+    try { total = Number(await walletContract.totalPropuestas()); } catch { }
     let pendientes = 0, ejecutadas = 0, expiradas = 0;
     for (let i = 0; i < total; i++) {
       try {
@@ -665,7 +684,7 @@ app.get("/wallets/:walletAddress/dashboard", async (req, res) => {
         if (estado === 0) pendientes++;
         else if (estado === 1) ejecutadas++;
         else expiradas++;
-      } catch {}
+      } catch { }
     }
 
     // top aportes (llamar endpoint interno)
@@ -690,9 +709,9 @@ app.get("/wallets/:walletAddress/dashboard", async (req, res) => {
           totalHNL: await convert.ethToHnl(totalETH),
         });
       }
-      aportes.sort((a,b)=> Number(b.totalWei) - Number(a.totalWei));
+      aportes.sort((a, b) => Number(b.totalWei) - Number(a.totalWei));
       aportes = aportes.slice(0, 5);
-    } catch {}
+    } catch { }
 
     // últimas 5 tx
     let ultimasTx = [];
@@ -703,7 +722,7 @@ app.get("/wallets/:walletAddress/dashboard", async (req, res) => {
       const txs = txResp?.transactions || txResp?.data || [];
       for (const t of txs) {
         const blockNumber = t.blockNumber || t.block;
-        let ts = Date.now()/1000;
+        let ts = Date.now() / 1000;
         if (blockNumber) {
           const blk = await customHttpProvider.getBlock(BigInt(blockNumber));
           if (blk?.timestamp) ts = Number(blk.timestamp);
@@ -724,7 +743,7 @@ app.get("/wallets/:walletAddress/dashboard", async (req, res) => {
           montoHNL: await convert.ethToHnl(valueETH),
         });
       }
-    } catch {}
+    } catch { }
 
     res.json({
       walletAddress,
