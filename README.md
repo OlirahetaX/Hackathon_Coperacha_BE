@@ -75,8 +75,7 @@ El bot gestiona el **registro de usuarios** vía chat:
 4. Menú principal:
 
    * `1` Ver saldo
-   * `2` Ver aportaciones
-   * `3` Ver votos
+
 
 ### Comandos especiales
 
